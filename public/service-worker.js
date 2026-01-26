@@ -1,4 +1,4 @@
-const CACHE_NAME = 'today-pay-v1';
+const CACHE_NAME = 'today-pay-v2';
 const urlsToCache = [
     './',
     './index.html',
