@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import CalendarPage from './pages/CalendarPage';
@@ -13,7 +13,7 @@ import ScrollToTop from './components/common/ScrollToTop';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ScrollToTop />
       <BusinessProvider>
         <DateFilterProvider>
@@ -30,7 +30,7 @@ function App() {
           </FontSizeProvider>
         </DateFilterProvider>
       </BusinessProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
