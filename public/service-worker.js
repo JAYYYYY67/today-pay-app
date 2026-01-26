@@ -1,4 +1,4 @@
-const CACHE_NAME = 'today-pay-v3';
+const CACHE_NAME = 'today-pay-v4';
 const urlsToCache = [
     './',
     './index.html',
@@ -7,7 +7,6 @@ const urlsToCache = [
 
 // Install: 캐시 초기화 및 자원 캐싱 + 즉시 대기열 건너뛰기
 self.addEventListener('install', (event) => {
-    // 즉시 활성화 (대기 상태 너뛰기)
     self.skipWaiting();
 
     event.waitUntil(
@@ -19,15 +18,27 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Fetch: 요청 가로채기 및 캐시 반환 (Cache First Strategy)
+// Fetch: 요청 가로채기 및 캐시 반환 (SPA Fallback Strategy)
 self.addEventListener('fetch', (event) => {
+    // 1. Navigation Request (HTML 페이지 요청) -> index.html 반환
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            caches.match('./index.html')
+                .then((response) => {
+                    return response || fetch(event.request).catch(() => {
+                        // 오프라인이거나 네트워크 실패 시 캐시된 index.html 반환 (이미 위에서 체크하지만 안전장치)
+                        return caches.match('./index.html');
+                    });
+                })
+        );
+        return;
+    }
+
+    // 2. Static Assets (이미지, JS, CSS 등) -> Cache First
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
+                return response || fetch(event.request);
             })
     );
 });
