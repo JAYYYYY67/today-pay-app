@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { Employee, WorkLog } from '../types';
+import Button from '../components/ui/Button';
 import { Download, Upload, Trash2, RotateCcw, UserX, Type, Building2, Pencil, Plus, Check, X, BookOpen } from 'lucide-react';
 import { useFontSize } from '../contexts/FontSizeContext';
 import { useBusiness } from '../contexts/BusinessContext';
@@ -16,6 +17,38 @@ export default function SettingsPage() {
 
     const [isRetiredModalOpen, setIsRetiredModalOpen] = useState(false);
     const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+
+    // ... (중략) ...
+
+    {/* 4. 인사 이동 */ }
+    <section>
+        <h4 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-teal-100 text-primary flex items-center justify-center text-sm">4</span>
+            인사 이동 (전근/퇴사)
+        </h4>
+        <ul className="space-y-2 text-sm text-gray-600 pl-1">
+            <li className="flex flex-col gap-1">
+                <div className="font-bold text-gray-800">• 전근 (지점 이동)</div>
+                <div className="pl-3 text-xs text-gray-500">직원 상세 &gt; 수정 &gt; [소속 사업장 이동] 선택 (과거 기록은 현재 지점에 안전하게 보관됩니다)</div>
+            </li>
+            <li className="flex flex-col gap-1">
+                <div className="font-bold text-gray-800">• 퇴사 처리</div>
+                <div className="pl-3 text-xs text-gray-500">직원 상세 &gt; 수정 &gt; [퇴사] 체크 (오늘 이후의 미래 근무 일정만 자동으로 정리됩니다)</div>
+            </li>
+        </ul>
+    </section>
+
+    {/* 5. 데이터 백업 */ }
+    <section>
+        <h4 className="text-lg font-bold text-red-500 mb-2 flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-sm">5</span>
+            데이터 백업 (필수 ⭐️)
+        </h4>
+        <div className="bg-red-50 p-4 rounded-2xl text-sm text-gray-700 leading-relaxed border border-red-100">
+            <p className="mb-2 font-bold">이 앱은 서버가 없습니다!</p>
+            모든 장부는 사장님 휴대폰에만 저장됩니다. 휴대폰 분실이나 앱 재설치를 대비해, <span className="font-bold underline">설정 &gt; 데이터 백업</span>을 눌러 파일을 카카오톡 '나와의 채팅' 등에 주기적으로 보관해주세요.
+        </div>
+    </section>
 
     // --- Business Management Logic ---
     const [editingBusinessId, setEditingBusinessId] = useState<string | null>(null);
@@ -559,11 +592,11 @@ export default function SettingsPage() {
                                 <ul className="space-y-2 text-sm text-gray-600 pl-1">
                                     <li className="flex flex-col gap-1">
                                         <div className="font-bold text-gray-800">• 전근 (지점 이동)</div>
-                                        <div className="pl-3 text-xs text-gray-500">직원 상세 > 수정 > [소속 사업장 이동] 선택 (과거 기록은 현재 지점에 안전하게 보관됩니다)</div>
+                                        <div className="pl-3 text-xs text-gray-500">직원 상세 &gt; 수정 &gt; [소속 사업장 이동] 선택 (과거 기록은 현재 지점에 안전하게 보관됩니다)</div>
                                     </li>
                                     <li className="flex flex-col gap-1">
                                         <div className="font-bold text-gray-800">• 퇴사 처리</div>
-                                        <div className="pl-3 text-xs text-gray-500">직원 상세 > 수정 > [퇴사] 체크 (오늘 이후의 미래 근무 일정만 자동으로 정리됩니다)</div>
+                                        <div className="pl-3 text-xs text-gray-500">직원 상세 &gt; 수정 &gt; [퇴사] 체크 (오늘 이후의 미래 근무 일정만 자동으로 정리됩니다)</div>
                                     </li>
                                 </ul>
                             </section>
@@ -576,7 +609,7 @@ export default function SettingsPage() {
                                 </h4>
                                 <div className="bg-red-50 p-4 rounded-2xl text-sm text-gray-700 leading-relaxed border border-red-100">
                                     <p className="mb-2 font-bold">이 앱은 서버가 없습니다!</p>
-                                    모든 장부는 사장님 휴대폰에만 저장됩니다. 휴대폰 분실이나 앱 재설치를 대비해, <span className="font-bold underline">설정 > 데이터 백업</span>을 눌러 파일을 카카오톡 '나와의 채팅' 등에 주기적으로 보관해주세요.
+                                    모든 장부는 사장님 휴대폰에만 저장됩니다. 휴대폰 분실이나 앱 재설치를 대비해, <span className="font-bold underline">설정 &gt; 데이터 백업</span>을 눌러 파일을 카카오톡 '나와의 채팅' 등에 주기적으로 보관해주세요.
                                 </div>
                             </section>
                         </div>
