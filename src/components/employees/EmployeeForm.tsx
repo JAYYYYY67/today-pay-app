@@ -149,8 +149,8 @@ export default function EmployeeForm({ onSubmit, onCancel, onTransfer, initialDa
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    placeholder="10000"
-                    value={amount}
+                    placeholder="10,000"
+                    value={amount ? Number(amount).toLocaleString() : ''}
                     onChange={(e) => {
                         const val = e.target.value.replace(/[^0-9]/g, '');
                         setAmount(val);
@@ -225,6 +225,7 @@ export default function EmployeeForm({ onSubmit, onCancel, onTransfer, initialDa
                                     <div className="flex items-center gap-1 ml-auto">
                                         <input
                                             type="number"
+                                            inputMode="decimal"
                                             step="0.1"
                                             value={customTaxRate}
                                             onChange={(e) => setCustomTaxRate(e.target.value)}
