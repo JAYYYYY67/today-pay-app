@@ -1,8 +1,7 @@
 import { useState, useRef } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { Employee, WorkLog } from '../types';
-import Button from '../components/ui/Button';
-import { Download, Upload, Trash2, RotateCcw, UserX, Type, Building2, Pencil, Plus, Check, X } from 'lucide-react';
+import { Download, Upload, Trash2, RotateCcw, UserX, Type, Building2, Pencil, Plus, Check, X, BookOpen } from 'lucide-react';
 import { useFontSize } from '../contexts/FontSizeContext';
 import { useBusiness } from '../contexts/BusinessContext';
 import { cn } from '../utils/cn';
@@ -16,6 +15,7 @@ export default function SettingsPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [isRetiredModalOpen, setIsRetiredModalOpen] = useState(false);
+    const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
     // --- Business Management Logic ---
     const [editingBusinessId, setEditingBusinessId] = useState<string | null>(null);
@@ -342,10 +342,12 @@ export default function SettingsPage() {
 
             <div className="h-px bg-gray-200 mx-2" />
 
-            {/* Data Management Section */}
+            {/* Help & Reset Section - Combined for better grouping or keep Data Management separate? Request said "under Data Backup/Restore" */}
+            {/* Let's keep Data Management section and add Help button before Reset button or in the same grid/list */}
+
             <section className="space-y-4">
                 <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 px-1">
-                    데이터 관리
+                    데이터 및 기타
                 </h2>
                 <div className="grid gap-4">
                     <button
@@ -389,6 +391,22 @@ export default function SettingsPage() {
                         onChange={handleRestore}
                         className="hidden"
                     />
+
+                    {/* Help Button */}
+                    <button
+                        onClick={() => setIsHelpModalOpen(true)}
+                        className="flex items-center justify-between p-5 bg-white border border-gray-100 rounded-[1.5rem] shadow-sm hover:shadow-md hover:border-blue-100 transition-all group"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                                <BookOpen className="w-6 h-6" />
+                            </div>
+                            <div className="text-left">
+                                <p className="font-bold text-gray-900 text-lg">사용 설명서</p>
+                                <p className="text-xs text-gray-500 font-medium mt-0.5">앱 사용법과 꿀팁을 확인하세요</p>
+                            </div>
+                        </div>
+                    </button>
 
                     <button
                         onClick={handleReset}
@@ -468,6 +486,106 @@ export default function SettingsPage() {
                             className="w-full mt-6 py-4 bg-gray-100 rounded-2xl text-gray-700 font-bold hover:bg-gray-200 transition-colors"
                         >
                             닫기
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* User Guide Modal */}
+            {isHelpModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl relative max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                <BookOpen className="w-6 h-6 text-primary" />
+                                사용 설명서
+                            </h3>
+                            <button onClick={() => setIsHelpModalOpen(false)} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 text-gray-500">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-8 pr-2">
+                            {/* 1. 홈 화면 추가 */}
+                            <section>
+                                <h4 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                    <span className="w-6 h-6 rounded-full bg-teal-100 text-primary flex items-center justify-center text-sm">1</span>
+                                    앱 설치 (홈 화면 추가)
+                                </h4>
+                                <div className="bg-gray-50 p-4 rounded-2xl text-sm text-gray-600 leading-relaxed border border-gray-100">
+                                    링크 접속 후 브라우저(Safari, Chrome) 메뉴의 <span className="font-bold text-gray-800">"홈 화면에 추가"</span>를 누르면 앱처럼 설치되어 더 편리하게 사용할 수 있습니다.
+                                </div>
+                            </section>
+
+                            {/* 2. 핵심 기능 */}
+                            <section>
+                                <h4 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                    <span className="w-6 h-6 rounded-full bg-teal-100 text-primary flex items-center justify-center text-sm">2</span>
+                                    핵심 기능
+                                </h4>
+                                <ul className="space-y-2 text-sm text-gray-600 pl-1">
+                                    <li className="flex gap-2">
+                                        <span className="font-bold text-gray-800 min-w-[70px]">• 직원 등록:</span>
+                                        <span>하단 [직원] 탭의 (+) 버튼을 눌러 등록</span>
+                                    </li>
+                                    <li className="flex gap-2">
+                                        <span className="font-bold text-gray-800 min-w-[70px]">• 근무 기록:</span>
+                                        <span>[근무] 탭 달력 날짜를 터치하여 입력</span>
+                                    </li>
+                                    <li className="flex gap-2">
+                                        <span className="font-bold text-gray-800 min-w-[70px]">• 급여 정산:</span>
+                                        <span>[통계] 탭에서 이번 달 총 급여 확인 및 명세서 이미지 공유</span>
+                                    </li>
+                                </ul>
+                            </section>
+
+                            {/* 3. 여러 사업장 관리 */}
+                            <section>
+                                <h4 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                    <span className="w-6 h-6 rounded-full bg-teal-100 text-primary flex items-center justify-center text-sm">3</span>
+                                    여러 사업장 관리
+                                </h4>
+                                <div className="bg-gray-50 p-4 rounded-2xl text-sm text-gray-600 leading-relaxed border border-gray-100">
+                                    좌측 상단 메뉴(햄버거 버튼 또는 홈 아이콘)를 통해 여러 사업장을 추가하고 자유롭게 전환할 수 있습니다.
+                                </div>
+                            </section>
+
+                            {/* 4. 인사 이동 */}
+                            <section>
+                                <h4 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                    <span className="w-6 h-6 rounded-full bg-teal-100 text-primary flex items-center justify-center text-sm">4</span>
+                                    인사 이동 (전근/퇴사)
+                                </h4>
+                                <ul className="space-y-2 text-sm text-gray-600 pl-1">
+                                    <li className="flex flex-col gap-1">
+                                        <div className="font-bold text-gray-800">• 전근 (지점 이동)</div>
+                                        <div className="pl-3 text-xs text-gray-500">직원 상세 > 수정 > [소속 사업장 이동] 선택 (과거 기록은 현재 지점에 안전하게 보관됩니다)</div>
+                                    </li>
+                                    <li className="flex flex-col gap-1">
+                                        <div className="font-bold text-gray-800">• 퇴사 처리</div>
+                                        <div className="pl-3 text-xs text-gray-500">직원 상세 > 수정 > [퇴사] 체크 (오늘 이후의 미래 근무 일정만 자동으로 정리됩니다)</div>
+                                    </li>
+                                </ul>
+                            </section>
+
+                            {/* 5. 데이터 백업 */}
+                            <section>
+                                <h4 className="text-lg font-bold text-red-500 mb-2 flex items-center gap-2">
+                                    <span className="w-6 h-6 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-sm">5</span>
+                                    데이터 백업 (필수 ⭐️)
+                                </h4>
+                                <div className="bg-red-50 p-4 rounded-2xl text-sm text-gray-700 leading-relaxed border border-red-100">
+                                    <p className="mb-2 font-bold">이 앱은 서버가 없습니다!</p>
+                                    모든 장부는 사장님 휴대폰에만 저장됩니다. 휴대폰 분실이나 앱 재설치를 대비해, <span className="font-bold underline">설정 > 데이터 백업</span>을 눌러 파일을 카카오톡 '나와의 채팅' 등에 주기적으로 보관해주세요.
+                                </div>
+                            </section>
+                        </div>
+
+                        <button
+                            onClick={() => setIsHelpModalOpen(false)}
+                            className="w-full mt-6 py-4 bg-primary text-white rounded-2xl font-bold hover:bg-teal-700 transition-colors shadow-lg shadow-teal-200"
+                        >
+                            확인했습니다
                         </button>
                     </div>
                 </div>
