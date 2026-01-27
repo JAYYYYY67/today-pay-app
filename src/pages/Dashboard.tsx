@@ -254,9 +254,9 @@ export default function Dashboard() {
                                             <p className="text-xs text-gray-400 font-medium mt-0.5">{emp.bankName} {emp.accountNumber}</p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="font-bold text-xl text-gray-900 tracking-tight">{formatCurrency(finalPay)}원</p>
-                                        <p className="text-xs text-gray-400 font-medium mt-0.5">실수령액</p>
+                                    <div className="text-right shrink-0">
+                                        <p className="font-bold text-xl text-gray-900 tracking-tight whitespace-nowrap">{formatCurrency(finalPay)}원</p>
+                                        <p className="text-xs text-gray-400 font-medium mt-0.5 whitespace-nowrap">실수령액</p>
                                     </div>
                                 </div>
 
