@@ -428,21 +428,23 @@ export default function CalendarPage() {
                                 </span>
                             )}
 
-                            {/* Dots for logs - Improved Visual */}
-                            <div className="flex gap-0.5 flex-wrap justify-center w-full px-1 mt-auto pb-1.5">
+                            {/* Name Badges for logs - New Visual */}
+                            <div className="flex flex-col gap-0.5 w-full px-0.5 mt-auto pb-1 overflow-hidden">
                                 {dayLogs.map((log) => {
-                                    // 중요: allEmployees에서 찾아야 이동한/퇴사한 직원도 찾을 수 있음
                                     const emp = allEmployees.find(e => e.id === log.employeeId);
                                     const hasMemo = !!log.memo;
                                     return (
                                         <div
                                             key={log.id}
                                             className={cn(
-                                                "w-2 h-2 rounded-full ring-1 ring-white",
-                                                hasMemo ? "bg-orange-400" : "bg-primary"
+                                                "w-full rounded text-[9px] font-bold truncate text-center py-0.5 leading-none px-0.5",
+                                                hasMemo
+                                                    ? "bg-orange-100 text-orange-800"
+                                                    : "bg-teal-50 text-teal-700"
                                             )}
-                                            title={emp?.name}
-                                        />
+                                        >
+                                            {emp?.name}
+                                        </div>
                                     );
                                 })}
                             </div>
