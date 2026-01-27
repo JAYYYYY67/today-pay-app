@@ -8,5 +8,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    target: 'es2015', // 호환성 강화
   }
 })
