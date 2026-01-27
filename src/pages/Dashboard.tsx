@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { startOfMonth, endOfMonth, isWithinInterval, format, startOfYear, endOfYear } from 'date-fns';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { type Employee, type WorkLog } from '../types';
 import { formatCurrency } from '../utils/format';
 import { getBankCode } from '../utils/banks';
 import { calculatePay, type WeeklyDetail, type PayDetail } from '../utils/pay';
-import { Send, Lock, CheckCircle2 } from 'lucide-react';
+import { Send, Lock, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { cn } from '../utils/cn';
 import { useDateFilter } from '../contexts/DateFilterContext';
@@ -22,6 +22,21 @@ export default function Dashboard() {
     const workLogs = allWorkLogs.filter(l => l.businessId === currentBusinessId);
 
     const { year, month } = useDateFilter();
+
+    // UI State for expanding Base Pay details
+    const [expandedBasePayItems, setExpandedBasePayItems] = useState<Set<string>>(new Set());
+
+    const toggleBasePay = (id: string) => {
+        setExpandedBasePayItems(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+            return next;
+        });
+    };
 
     // Calculate pay
     const employeePayMap = useMemo(() => {
@@ -197,6 +212,10 @@ export default function Dashboard() {
                             let totalHoliday = 0;
                             let totalTax = 0;
                             let totalFinal = 0;
+                            let totalBase = 0;
+                            let totalNight = 0;
+                            let totalHours = 0;
+                            let totalNightHours = 0;
 
                             // 1월부터 12월까지 순회하여 합산
                             for (let m = 0; m < 12; m++) {
@@ -206,6 +225,10 @@ export default function Dashboard() {
                                 totalHoliday += monthly.holidayAllowance;
                                 totalTax += monthly.taxAmount;
                                 totalFinal += monthly.finalPay;
+                                totalBase += monthly.basePay || 0;
+                                totalNight += monthly.nightPay || 0;
+                                totalHours += monthly.totalWorkHours || 0;
+                                totalNightHours += monthly.totalNightWorkHours || 0;
                             }
 
                             payDetail = {
@@ -214,14 +237,18 @@ export default function Dashboard() {
                                 totalBeforeTax: totalOriginal + totalHoliday,
                                 taxAmount: totalTax,
                                 finalPay: totalFinal,
-                                weeklyDetails: [] // 연간 뷰에선 상세 주휴 내역 생략
+                                weeklyDetails: [], // 연간 뷰에선 상세 주휴 내역 생략
+                                basePay: totalBase,
+                                nightPay: totalNight,
+                                totalWorkHours: totalHours,
+                                totalNightWorkHours: totalNightHours
                             };
                         } else {
                             // 월간 조회
                             payDetail = calculatePay(emp, workLogs, targetDate);
                         }
 
-                        const { originalPay, holidayAllowance, taxAmount, finalPay, weeklyDetails } = payDetail;
+                        const { originalPay, holidayAllowance, taxAmount, finalPay, weeklyDetails, basePay, nightPay, totalWorkHours, totalNightWorkHours } = payDetail;
                         const taxRate = emp.taxRate || 0;
 
                         // 타지점/퇴사 여부 확인
@@ -263,9 +290,60 @@ export default function Dashboard() {
                                 {/* Pay Details Accordion / Summary */}
                                 <div className="bg-gray-50 rounded-2xl p-5 space-y-4 text-base border border-gray-100/50">
                                     {/* 1. Basic Pay */}
-                                    <div className="flex justify-between items-center text-gray-600 font-medium">
-                                        <span>기본 급여</span>
-                                        <span className="text-gray-900 font-bold text-lg">{formatCurrency(originalPay)}원</span>
+                                    {/* 1. Basic Pay & Work Hours Summary */}
+                                    <div className="space-y-1">
+                                        <div
+                                            className={cn(
+                                                "flex justify-between items-center text-gray-600 font-medium transition-colors p-1 -m-1 rounded-lg",
+                                                (totalNightWorkHours || 0) > 0 ? "cursor-pointer hover:bg-gray-100" : ""
+                                            )}
+                                            onClick={() => (totalNightWorkHours || 0) > 0 && toggleBasePay(emp.id)}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span>기본 급여</span>
+                                                {(totalNightWorkHours || 0) > 0 && (
+                                                    expandedBasePayItems.has(emp.id)
+                                                        ? <ChevronUp className="w-4 h-4 text-gray-400" />
+                                                        : <ChevronDown className="w-4 h-4 text-gray-400" />
+                                                )}
+                                            </div>
+                                            <span className="text-gray-900 font-bold text-lg">{formatCurrency(originalPay)}원</span>
+                                        </div>
+
+                                        {/* Total Work Hours Summary */}
+                                        {(totalWorkHours || 0) > 0 && (
+                                            <div className="text-xs text-gray-400 font-medium px-1">
+                                                총 {Number(totalWorkHours?.toFixed(1))}시간
+                                                <span className="text-gray-300 mx-1">|</span>
+                                                (주간 {Number(((totalWorkHours || 0) - (totalNightWorkHours || 0)).toFixed(1))}h / 야간 {Number(totalNightWorkHours?.toFixed(1))}h)
+                                            </div>
+                                        )}
+
+                                        {/* Detailed Breakdown (Accordion) */}
+                                        {expandedBasePayItems.has(emp.id) && (totalNightWorkHours || 0) > 0 && (
+                                            <div className="pl-3 border-l-2 border-teal-100 space-y-1.5 py-1 my-2 text-xs text-gray-500 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                {/* Daytime */}
+                                                <div className="flex justify-between">
+                                                    <span>
+                                                        주간 {Number(((totalWorkHours || 0) - (totalNightWorkHours || 0)).toFixed(1))}시간
+                                                        x {formatCurrency(emp.amount)}원
+                                                    </span>
+                                                    <span>
+                                                        {formatCurrency((basePay || 0) - ((nightPay || 0) * 2))}원
+                                                    </span>
+                                                </div>
+                                                {/* Nighttime */}
+                                                <div className="flex justify-between text-orange-600 font-medium">
+                                                    <span>
+                                                        야간 {Number(totalNightWorkHours?.toFixed(1))}시간
+                                                        x {formatCurrency(emp.amount)}원 x 1.5
+                                                    </span>
+                                                    <span>
+                                                        {formatCurrency((nightPay || 0) * 3)}원
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* 2. Holiday Allowance */}
