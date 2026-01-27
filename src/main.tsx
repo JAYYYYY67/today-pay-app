@@ -15,10 +15,13 @@ createRoot(document.getElementById('root')!).render(
 
 
 // Service Worker Registration for PWA
+// Service Worker Force Unregister (to fix caching issues on mobile)
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').catch(err => {
-      console.error('ServiceWorker registration failed: ', err);
-    });
+  navigator.serviceWorker.getRegistrations().then(function (registrations) {
+    for (let registration of registrations) {
+      registration.unregister()
+        .then(() => console.log('Service Worker unregistered'))
+        .catch(err => console.error('Service Worker unregistration failed:', err));
+    }
   });
 }
