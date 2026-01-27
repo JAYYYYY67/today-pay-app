@@ -38,6 +38,21 @@ export default function Dashboard() {
         });
     };
 
+    // UI State for expanding Holiday Allowance details
+    const [expandedHolidayPayItems, setExpandedHolidayPayItems] = useState<Set<string>>(new Set());
+
+    const toggleHolidayPay = (id: string) => {
+        setExpandedHolidayPayItems(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+            return next;
+        });
+    };
+
     // Calculate pay
     const employeePayMap = useMemo(() => {
         // Determine date range based on filter
@@ -348,28 +363,41 @@ export default function Dashboard() {
 
                                     {/* 2. Holiday Allowance */}
                                     {emp.applyHolidayAllowance && (
-                                        <div className="flex justify-between items-center text-gray-600 font-medium">
-                                            <div className="flex items-center gap-2">
-                                                <span>주휴수당</span>
-                                                {weeklyDetails.length > 0 && (
-                                                    <span className="text-xs bg-white border border-gray-200 text-gray-500 px-2 py-0.5 rounded-md">
-                                                        {month === 'ALL' ? '연간 합산' : `${weeklyDetails.length}주`}
-                                                    </span>
+                                        <div className="space-y-1">
+                                            <div
+                                                className={cn(
+                                                    "flex justify-between items-center text-gray-600 font-medium transition-colors p-1 -m-1 rounded-lg",
+                                                    weeklyDetails.length > 0 && month !== 'ALL' ? "cursor-pointer hover:bg-gray-100" : ""
                                                 )}
-                                            </div>
-                                            <span className="text-primary font-bold text-lg">+{formatCurrency(holidayAllowance)}원</span>
-                                        </div>
-                                    )}
-
-                                    {/* Weekly Holiday Details (Simple List) - Hide in Annual View */}
-                                    {month !== 'ALL' && holidayAllowance > 0 && (
-                                        <div className="pl-3 border-l-2 border-teal-100 space-y-1.5 py-1 my-1">
-                                            {weeklyDetails.map((week: WeeklyDetail, idx: number) => (
-                                                <div key={idx} className="flex justify-between text-xs text-gray-500">
-                                                    <span>{week.weekRange} ({week.workHours}h)</span>
-                                                    <span>{week.hasHolidayAllowance ? `+${formatCurrency(week.allowanceAmount)}` : '-'}</span>
+                                                onClick={() => weeklyDetails.length > 0 && month !== 'ALL' && toggleHolidayPay(emp.id)}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <span>주휴수당</span>
+                                                    {weeklyDetails.length > 0 && month !== 'ALL' && (
+                                                        expandedHolidayPayItems.has(emp.id)
+                                                            ? <ChevronUp className="w-4 h-4 text-gray-400" />
+                                                            : <ChevronDown className="w-4 h-4 text-gray-400" />
+                                                    )}
+                                                    {weeklyDetails.length > 0 && (
+                                                        <span className="text-xs bg-white border border-gray-200 text-gray-500 px-2 py-0.5 rounded-md">
+                                                            {month === 'ALL' ? '연간 합산' : `${weeklyDetails.length}주`}
+                                                        </span>
+                                                    )}
                                                 </div>
-                                            ))}
+                                                <span className="text-primary font-bold text-lg">+{formatCurrency(holidayAllowance)}원</span>
+                                            </div>
+
+                                            {/* Weekly Holiday Details (Accordion) - Hide in Annual View */}
+                                            {month !== 'ALL' && holidayAllowance > 0 && expandedHolidayPayItems.has(emp.id) && (
+                                                <div className="pl-3 border-l-2 border-teal-100 space-y-1.5 py-1 my-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    {weeklyDetails.map((week: WeeklyDetail, idx: number) => (
+                                                        <div key={idx} className="flex justify-between text-xs text-gray-500">
+                                                            <span>{week.weekRange} ({week.workHours}h)</span>
+                                                            <span>{week.hasHolidayAllowance ? `+${formatCurrency(week.allowanceAmount)}` : '-'}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
