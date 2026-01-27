@@ -11,6 +11,27 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
   <!-- Global Error Handler (For Debugging White Screen) -->
+  <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
+  <script>
+    console.log('HTML Loaded - Eruda Initialized');
+  </script>
+  <style>
+    body {
+      background-color: pink !important;
+    }
+
+    #loading-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      font-weight: bold;
+      color: black;
+      z-index: 0;
+    }
+  </style>
   <script>
     window.onerror = function (msg, url, lineNo, columnNo, error) {
       const container = document.createElement('div');
@@ -55,6 +76,7 @@
 </head>
 
 <body>
+  <div id="loading-text">앱 로딩 중... (배경: 핑크)<br>이 화면이 보이면 HTML은 정상</div>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
