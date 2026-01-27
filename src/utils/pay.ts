@@ -14,6 +14,12 @@ export interface PayDetail {
 
     // 주휴수당 상세 정보 (주차별)
     weeklyDetails: WeeklyDetail[];
+
+    // NEW: 상세 근무 시간 및 수당 내역
+    totalWorkHours?: number; // 총 근무 시간
+    totalNightWorkHours?: number; // 총 야간 근무 시간
+    basePay?: number; // 야간 할증 제외한 순수 기본급
+    nightPay?: number; // 야간 할증 수당 (추가된 0.5배분)
 }
 
 export interface WeeklyDetail {
@@ -37,21 +43,40 @@ export function calculatePay(
         return isWithinInterval(logDate, { start: monthStart, end: monthEnd }) && log.employeeId === employee.id;
     });
 
-    // 2. 기본 급여 계산
+    // 2. 기본 급여 및 시간 계산
     let originalPay = 0;
+
+    // 상세 내역 집계 변수
+    let totalWorkHours = 0;
+    let totalNightWorkHours = 0;
+    let basePayAmount = 0; // 기본 시급에 해당하는 금액 (주간 + 야간의 1.0배)
+    let nightPayAmount = 0; // 야간 수당 (야간의 0.5배)
+
     monthLogs.forEach(log => {
         // 스냅샷이 있으면 스냅샷의 시급/금액 사용, 없으면 현재 직원 정보 사용
         const hourlyRate = log.snapshot?.hourlyRate ?? employee.amount;
 
         if (employee.paymentType === 'HOURLY') {
-            let rate = hourlyRate;
-            // 야간수당 적용 (1.5배)
-            if (log.isNightShift) rate *= 1.5;
-            originalPay += (log.hours || 0) * rate;
+            const hours = log.hours || 0;
+            totalWorkHours += hours;
+
+            if (log.isNightShift) {
+                totalNightWorkHours += hours;
+                // 야간: 1.5배 (기본 1.0 + 할증 0.5)
+                basePayAmount += hours * hourlyRate;
+                nightPayAmount += hours * hourlyRate * 0.5;
+                originalPay += hours * hourlyRate * 1.5;
+            } else {
+                basePayAmount += hours * hourlyRate;
+                originalPay += hours * hourlyRate;
+            }
         } else if (employee.paymentType === 'DAILY') {
             originalPay += hourlyRate;
+            basePayAmount += hourlyRate;
+            // 일당제는 시간 집계가 애매하므로 count 1로 취급하거나 hours 미반영
         } else if (employee.paymentType === 'PER_TASK') {
             originalPay += (log.count || 1) * hourlyRate;
+            basePayAmount += (log.count || 1) * hourlyRate;
         }
     });
 
@@ -143,6 +168,11 @@ export function calculatePay(
         totalBeforeTax,
         taxAmount,
         finalPay,
-        weeklyDetails
+        weeklyDetails,
+        // 상세 내역
+        totalWorkHours,
+        totalNightWorkHours,
+        basePay: basePayAmount,
+        nightPay: nightPayAmount
     };
 }
