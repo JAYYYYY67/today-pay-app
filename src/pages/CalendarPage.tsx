@@ -384,7 +384,7 @@ export default function CalendarPage() {
             />
 
             {/* Week Days */}
-            <div className="grid grid-cols-7 text-center text-base font-bold text-gray-500 py-3 border-b border-gray-100">
+            <div className="grid grid-cols-7 text-center text-lg font-bold text-gray-500 py-3 border-b border-gray-100">
                 {['일', '월', '화', '수', '목', '금', '토'].map(day => (
                     <div key={day} className={day === '일' ? 'text-red-500' : day === '토' ? 'text-teal-600' : ''}>{day}</div>
                 ))}
@@ -406,7 +406,7 @@ export default function CalendarPage() {
                             key={date.toString()}
                             onClick={() => handleDateClick(date)}
                             className={cn(
-                                "min-h-[75px] rounded-2xl p-1 relative cursor-pointer flex flex-col items-center pt-1 transition-all duration-200 border-2",
+                                "min-h-[85px] rounded-2xl p-1 relative cursor-pointer flex flex-col items-center pt-1 transition-all duration-200 border-2", // min-h 늘림
                                 isSelected
                                     ? "border-primary bg-teal-50/50 ring-2 ring-teal-100 ring-offset-2 z-10"
                                     : "border-transparent hover:bg-gray-50",
@@ -415,7 +415,7 @@ export default function CalendarPage() {
                             )}
                         >
                             <span className={cn(
-                                "text-lg w-8 h-8 flex items-center justify-center rounded-full font-bold mb-0.5 transition-transform",
+                                "text-xl w-9 h-9 flex items-center justify-center rounded-full font-bold mb-0.5 transition-transform", // text-xl, w-9 h-9
                                 isToday ? "bg-primary text-white shadow-md scale-110" : dayColor
                             )}>
                                 {format(date, 'd')}
@@ -437,7 +437,7 @@ export default function CalendarPage() {
                                         <div
                                             key={log.id}
                                             className={cn(
-                                                "w-full rounded text-[9px] font-bold truncate text-center py-0.5 leading-none px-0.5",
+                                                "w-full rounded text-[10px] font-bold truncate text-center py-0.5 leading-none px-0.5", // text-[10px]
                                                 hasMemo
                                                     ? "bg-orange-100 text-orange-800"
                                                     : "bg-teal-50 text-teal-700"
