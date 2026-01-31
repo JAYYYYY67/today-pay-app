@@ -23,9 +23,17 @@ export default function PayDayNoticeModal({
     useEffect(() => {
         if (isOpen) {
             setAnimate(true);
+            // Prevent background scrolling
+            document.body.style.overflow = 'hidden';
         } else {
             setAnimate(false);
+            // Restore background scrolling
+            document.body.style.overflow = 'unset';
         }
+
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
     }, [isOpen]);
 
     if (!isOpen) return null;
@@ -59,7 +67,7 @@ export default function PayDayNoticeModal({
 
                 {/* Content */}
                 <div className="p-6">
-                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar space-y-4">
+                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar space-y-4 overscroll-contain">
                         {dDayEmployees.length > 0 && (
                             <div className="space-y-3">
                                 <h3 className="text-sm font-bold text-teal-600 flex items-center gap-1.5 uppercase tracking-wider">
