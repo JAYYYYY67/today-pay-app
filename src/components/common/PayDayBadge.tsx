@@ -81,7 +81,7 @@ export default function PayDayBadge({ payDay, className }: PayDayBadgeProps) {
 
     return (
         <div className={cn(
-            "min-w-12 w-auto h-12 px-2 rounded-xl flex flex-col items-center justify-center shadow-inner transition-all whitespace-nowrap",
+            "min-w-10 w-auto h-12 px-1 md:px-3 rounded-xl flex flex-col items-center justify-center shadow-inner transition-all whitespace-nowrap",
             colorClass,
             className
         )}>
@@ -89,8 +89,10 @@ export default function PayDayBadge({ payDay, className }: PayDayBadgeProps) {
                 <span className="text-xl font-bold">?</span>
             ) : (
                 <span className={cn(
-                    "font-bold leading-none",
-                    dDay === 0 ? "text-[10px] font-black tracking-tighter" : "text-lg"
+                    "font-bold leading-none select-none",
+                    dDay === 0
+                        ? "text-xs md:text-[11px] font-extrabold tracking-tighter" // Mobile: larger, Bolder, Tighter
+                        : "text-lg md:text-xl"
                 )}>
                     {label}
                 </span>
