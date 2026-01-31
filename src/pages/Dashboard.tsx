@@ -456,9 +456,9 @@ export default function Dashboard() {
                                             <Button
                                                 onClick={() => handleCompletePayment(emp)}
                                                 variant="secondary"
-                                                className="flex-1 min-w-[100px] py-3.5 border-transparent bg-gray-100 hover:bg-gray-200 text-gray-600 shadow-none whitespace-nowrap"
+                                                className="flex-1 min-w-[100px] px-3 py-3.5 border-transparent bg-gray-100 hover:bg-gray-200 text-gray-600 shadow-none whitespace-nowrap"
                                             >
-                                                <CheckSquare className="w-5 h-5 mr-1" />
+                                                <CheckSquare className="w-5 h-5 mr-1.5 shrink-0" />
                                                 지급 완료
                                             </Button>
                                         )
