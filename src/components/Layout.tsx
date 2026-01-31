@@ -25,6 +25,7 @@ export default function Layout() {
 
     // Notification Logic
     const [employees] = useLocalStorage<Employee[]>('employees', []);
+    const [workLogs] = useLocalStorage('workLogs', []); // Load workLogs for calculation
     const [isNotificationEnabled] = useLocalStorage('payDayNotificationEnabled', true);
     const [lastBrowserNotifDate, setLastBrowserNotifDate] = useLocalStorage('lastPayDayBrowserNotificationDate', '');
     const [modalHiddenDate, setModalHiddenDate] = useLocalStorage('payDayModalHiddenDate', '');
@@ -115,6 +116,7 @@ export default function Layout() {
                     onDontShowToday={handleDontShowToday}
                     dDayEmployees={modalData.dDayEmployees}
                     dMinusOneEmployees={modalData.dMinusOneEmployees}
+                    workLogs={workLogs}
                 />
             )}
         </div>

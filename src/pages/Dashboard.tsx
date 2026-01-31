@@ -5,7 +5,7 @@ import { type Employee, type WorkLog } from '../types';
 import { formatCurrency } from '../utils/format';
 import { getBankCode } from '../utils/banks';
 import { calculatePay, type WeeklyDetail, type PayDetail } from '../utils/pay';
-import { Send, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, CheckSquare, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { cn } from '../utils/cn';
 import { useDateFilter } from '../contexts/DateFilterContext';
@@ -458,7 +458,7 @@ export default function Dashboard() {
                                                 variant="secondary"
                                                 className="flex-1 min-w-[100px] py-3.5 border-transparent bg-gray-100 hover:bg-gray-200 text-gray-600 shadow-none whitespace-nowrap"
                                             >
-                                                <CheckCircle2 className="w-5 h-5 mr-1" />
+                                                <CheckSquare className="w-5 h-5 mr-1" />
                                                 지급 완료
                                             </Button>
                                         )

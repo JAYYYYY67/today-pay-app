@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import type { Employee } from '../../types';
-import { X, Calendar, CreditCard, CheckCircle2 } from 'lucide-react';
+import type { Employee, WorkLog } from '../../types';
+import { X, Calendar, CheckCircle2 } from 'lucide-react';
 import { formatCurrency } from '../../utils/format';
+import { calculatePay } from '../../utils/pay';
 
 interface PayDayNoticeModalProps {
     isOpen: boolean;
@@ -9,6 +10,7 @@ interface PayDayNoticeModalProps {
     onDontShowToday: () => void;
     dDayEmployees: Employee[];
     dMinusOneEmployees: Employee[];
+    workLogs: WorkLog[];
 }
 
 export default function PayDayNoticeModal({
@@ -16,7 +18,8 @@ export default function PayDayNoticeModal({
     onClose,
     onDontShowToday,
     dDayEmployees,
-    dMinusOneEmployees
+    dMinusOneEmployees,
+    workLogs
 }: PayDayNoticeModalProps) {
     const [animate, setAnimate] = useState(false);
 
@@ -39,6 +42,7 @@ export default function PayDayNoticeModal({
     if (!isOpen) return null;
 
     const totalCount = dDayEmployees.length + dMinusOneEmployees.length;
+    const now = new Date();
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -74,30 +78,17 @@ export default function PayDayNoticeModal({
                                     <Calendar className="w-4 h-4" />
                                     오늘 월급 ({dDayEmployees.length}명)
                                 </h3>
-                                {dDayEmployees.map(emp => (
-                                    <div key={emp.id} className="flex items-center justify-between p-3.5 bg-teal-50/50 rounded-2xl border border-teal-100/50">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold shadow-sm">
-                                                {emp.name[0]}
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-gray-900">{emp.name}</p>
-                                                <p className="text-xs text-gray-500 flex items-center gap-1">
-                                                    <CreditCard className="w-3 h-3" />
-                                                    {emp.bankName}
-                                                </p>
-                                            </div>
+                                {dDayEmployees.map(emp => {
+                                    const payDetail = calculatePay(emp, workLogs, now);
+                                    return (
+                                        <div key={emp.id} className="flex items-center justify-between p-4 bg-teal-50/50 rounded-2xl border border-teal-100/50">
+                                            <p className="font-bold text-gray-900 text-lg">{emp.name}</p>
+                                            <p className="font-bold text-teal-600 text-lg">
+                                                {formatCurrency(payDetail.finalPay)}원
+                                            </p>
                                         </div>
-                                        <div className="text-right">
-                                            <span className="block font-bold text-teal-600 text-sm">
-                                                {formatCurrency(emp.amount)}원
-                                            </span>
-                                            <span className="text-[10px] text-gray-400 font-medium bg-white px-1.5 py-0.5 rounded border border-gray-100 inline-block mt-0.5">
-                                                {emp.paymentType === 'HOURLY' ? '시급' : emp.paymentType === 'DAILY' ? '일당' : '건별'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
 
@@ -107,24 +98,17 @@ export default function PayDayNoticeModal({
                                     <Calendar className="w-4 h-4" />
                                     내일 월급 ({dMinusOneEmployees.length}명)
                                 </h3>
-                                {dMinusOneEmployees.map(emp => (
-                                    <div key={emp.id} className="flex items-center justify-between p-3.5 bg-amber-50/50 rounded-2xl border border-amber-100/50 opacity-80">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold shadow-sm">
-                                                {emp.name[0]}
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-gray-900">{emp.name}</p>
-                                                <p className="text-xs text-gray-500">D-1</p>
-                                            </div>
+                                {dMinusOneEmployees.map(emp => {
+                                    const payDetail = calculatePay(emp, workLogs, now);
+                                    return (
+                                        <div key={emp.id} className="flex items-center justify-between p-4 bg-amber-50/50 rounded-2xl border border-amber-100/50 opacity-80">
+                                            <p className="font-bold text-gray-900 text-lg">{emp.name}</p>
+                                            <p className="font-bold text-amber-600 text-lg">
+                                                {formatCurrency(payDetail.finalPay)}원
+                                            </p>
                                         </div>
-                                        <div className="text-right">
-                                            <span className="block font-bold text-gray-600 text-sm">
-                                                준비중
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

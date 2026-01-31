@@ -23,7 +23,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     className
                 )}
                 {...props}
-            />
+            >
+                {props.children}
+            </button>
         );
     }
 );
