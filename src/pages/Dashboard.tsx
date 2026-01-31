@@ -9,13 +9,14 @@ import { Send, CheckSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { cn } from '../utils/cn';
 import { useDateFilter } from '../contexts/DateFilterContext';
+import { generateId } from '../utils/id'; // Import generateId
 
 import { useBusiness } from '../contexts/BusinessContext';
 import PayDayBadge from '../components/common/PayDayBadge';
 
 export default function Dashboard() {
     const { currentBusinessId } = useBusiness();
-    const [allEmployees] = useLocalStorage<Employee[]>('employees', []);
+    const [allEmployees, setAllEmployees] = useLocalStorage<Employee[]>('employees', []);
     const [allWorkLogs, setAllWorkLogs] = useLocalStorage<WorkLog[]>('workLogs', []);
 
     // Filter by Current Business
@@ -37,6 +38,51 @@ export default function Dashboard() {
             }
             return next;
         });
+    };
+
+    // Advance Modal State
+    const [isAdvanceModalOpen, setIsAdvanceModalOpen] = useState(false);
+    const [selectedEmpForAdvance, setSelectedEmpForAdvance] = useState<Employee | null>(null);
+    const [advanceAmount, setAdvanceAmount] = useState('');
+    const [advanceDate, setAdvanceDate] = useState('');
+    const [advanceMemo, setAdvanceMemo] = useState('');
+
+    const handleOpenAdvanceModal = (emp: Employee) => {
+        setSelectedEmpForAdvance(emp);
+        setAdvanceAmount('');
+        setAdvanceDate(format(new Date(), 'yyyy-MM-dd'));
+        setAdvanceMemo('');
+        setIsAdvanceModalOpen(true);
+    };
+
+    const handleSaveAdvance = () => {
+        if (!selectedEmpForAdvance || !advanceAmount || !advanceDate) return;
+
+        const amount = parseInt(advanceAmount.replace(/,/g, ''), 10);
+        if (isNaN(amount) || amount <= 0) {
+            alert('올바른 금액을 입력해주세요.');
+            return;
+        }
+
+        const newAdvance = {
+            id: generateId(),
+            amount,
+            date: advanceDate,
+            memo: advanceMemo,
+            createdAt: Date.now()
+        };
+
+        setAllEmployees(prev => prev.map(emp => {
+            if (emp.id === selectedEmpForAdvance.id) {
+                return {
+                    ...emp,
+                    advances: [...(emp.advances || []), newAdvance]
+                };
+            }
+            return emp;
+        }));
+
+        setIsAdvanceModalOpen(false);
     };
 
     // UI State for expanding Holiday Allowance details
@@ -279,14 +325,16 @@ export default function Dashboard() {
                                 basePay: totalBase,
                                 nightPay: totalNight,
                                 totalWorkHours: totalHours,
-                                totalNightWorkHours: totalNightHours
+                                totalNightWorkHours: totalNightHours,
+                                totalAdvances: 0, // 연간 합산은 일단 0 or 차후 구현 (user request focused on month view)
+                                netPay: totalFinal // 연간 합산은 일단 finalPay
                             };
                         } else {
                             // 월간 조회
                             payDetail = calculatePay(emp, workLogs, targetDate);
                         }
 
-                        const { originalPay, holidayAllowance, taxAmount, finalPay, weeklyDetails, basePay, nightPay, totalWorkHours, totalNightWorkHours } = payDetail;
+                        const { originalPay, holidayAllowance, taxAmount, finalPay, weeklyDetails, basePay, nightPay, totalWorkHours, totalNightWorkHours, totalAdvances, netPay } = payDetail;
                         const taxRate = emp.taxRate || 0;
 
                         // 타지점/퇴사 여부 확인
@@ -321,7 +369,7 @@ export default function Dashboard() {
                                         </div>
                                     </div>
                                     <div className="text-right shrink-0">
-                                        <p className="font-bold text-xl text-gray-900 tracking-tight whitespace-nowrap">{formatCurrency(finalPay)}원</p>
+                                        <p className="font-bold text-xl text-gray-900 tracking-tight whitespace-nowrap">{formatCurrency(netPay)}원</p>
                                         <p className="text-xs text-gray-400 font-medium mt-0.5 whitespace-nowrap">실수령액</p>
                                     </div>
                                 </div>
@@ -435,6 +483,31 @@ export default function Dashboard() {
                                             </div>
                                         </>
                                     )}
+
+                                    {/* 4. Advance Deduction */}
+                                    {totalAdvances > 0 && (
+                                        <>
+                                            <div className="h-px bg-gray-200/60 my-2" />
+                                            <div className="flex justify-between items-center text-gray-600 font-medium">
+                                                <span className="flex items-center gap-1.5">
+                                                    💸 가불 차감
+                                                    <span className="text-xs bg-red-50 text-red-500 px-1.5 py-0.5 rounded font-medium">
+                                                        {emp.advances?.filter(a => new Date(a.date).getMonth() === targetDate.getMonth()).length}건
+                                                    </span>
+                                                </span>
+                                                <span className="text-red-600 font-bold text-lg">-{formatCurrency(totalAdvances)}원</span>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="pt-2 flex justify-start">
+                                        <button
+                                            onClick={() => handleOpenAdvanceModal(emp)}
+                                            className="text-xs flex items-center gap-1 text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-lg hover:bg-gray-200 transition-colors"
+                                        >
+                                            💸 가불 등록
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="flex flex-wrap justify-between items-center gap-3">
@@ -464,15 +537,15 @@ export default function Dashboard() {
                                         )
                                     )}
                                     <Button
-                                        onClick={() => handleTransfer(emp, finalPay)}
-                                        disabled={finalPay <= 0}
+                                        onClick={() => handleTransfer(emp, netPay)}
+                                        disabled={netPay <= 0}
                                         className={cn(
                                             "flex-[2] min-w-[120px] py-3.5 shadow-lg shadow-teal-500/20 text-lg whitespace-nowrap shrink-0",
-                                            finalPay <= 0 ? "bg-gray-100 text-gray-400 shadow-none" : "bg-primary text-white"
+                                            netPay <= 0 ? "bg-gray-100 text-gray-400 shadow-none" : "bg-primary text-white"
                                         )}
                                     >
                                         <Send className="w-5 h-5 mr-1.5" />
-                                        {finalPay > 0 ? '송금하기' : '지급액 없음'}
+                                        {netPay > 0 ? '송금하기' : '지급액 없음'}
                                     </Button>
                                 </div>
                             </div>
@@ -480,6 +553,73 @@ export default function Dashboard() {
                     })
                 )}
             </div>
+
+            {/* Advance Registration Modal */}
+            {isAdvanceModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl relative animate-in slide-in-from-bottom-5 duration-300">
+                        <h3 className="text-xl font-bold text-gray-900 mb-1">가불 등록</h3>
+                        <p className="text-gray-500 text-sm mb-6">
+                            미리 지급한 금액을 등록하면<br />
+                            급여 계산 시 자동으로 차감됩니다.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">금액</label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={advanceAmount}
+                                        onChange={(e) => setAdvanceAmount(e.target.value)}
+                                        className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all font-bold text-lg"
+                                        placeholder="0"
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">원</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">날짜</label>
+                                <input
+                                    type="date"
+                                    value={advanceDate}
+                                    onChange={(e) => setAdvanceDate(e.target.value)}
+                                    className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">메모 (선택)</label>
+                                <input
+                                    type="text"
+                                    value={advanceMemo}
+                                    onChange={(e) => setAdvanceMemo(e.target.value)}
+                                    className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                                    placeholder="예: 급한 병원비"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2 mt-8">
+                            <button
+                                onClick={() => setIsAdvanceModalOpen(false)}
+                                className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition-colors"
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={handleSaveAdvance}
+                                className="flex-[2] py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 transition-all active:scale-[0.98]"
+                            >
+                                등록하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

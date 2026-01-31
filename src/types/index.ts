@@ -5,6 +5,14 @@ export interface Business {
     name: string;
 }
 
+export interface Advance {
+    id: string;
+    amount: number;
+    date: string; // YYYY-MM-DD
+    memo?: string;
+    createdAt: number;
+}
+
 export interface Employee {
     id: string;
     businessId?: string; // 소속 사업장 ID (마이그레이션 후 필수)
@@ -18,6 +26,7 @@ export interface Employee {
     active: boolean;
     isRetired?: boolean; // 퇴사 여부 (Soft Delete)
     payDay?: number; // 월급날 (1~31)
+    advances?: Advance[]; // 가불 내역
     createdAt: number;
 }
 

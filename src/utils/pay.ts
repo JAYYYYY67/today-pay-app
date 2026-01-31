@@ -20,6 +20,10 @@ export interface PayDetail {
     totalNightWorkHours?: number; // 총 야간 근무 시간
     basePay?: number; // 야간 할증 제외한 순수 기본급
     nightPay?: number; // 야간 할증 수당 (추가된 0.5배분)
+
+    // 가불 내역
+    totalAdvances: number; // 총 가불 금액
+    netPay: number; // 최종 지급액 (실수령액 - 가불)
 }
 
 export interface WeeklyDetail {
@@ -162,6 +166,16 @@ export function calculatePay(
     const taxAmount = Math.floor((totalBeforeTax * (appliedTaxRate / 100)) / 10) * 10; // 1원 단위 절사
     const finalPay = totalBeforeTax - taxAmount;
 
+    // 4. 가불 계산 (NEW)
+    // 이번 달에 해당하는 가불 내역만 합산
+    const targetAdvances = employee.advances?.filter(adv => {
+        const advDate = new Date(adv.date);
+        return isWithinInterval(advDate, { start: monthStart, end: monthEnd });
+    }) || [];
+
+    const totalAdvances = targetAdvances.reduce((acc, adv) => acc + adv.amount, 0);
+    const netPay = finalPay - totalAdvances;
+
     return {
         originalPay,
         holidayAllowance,
@@ -173,6 +187,9 @@ export function calculatePay(
         totalWorkHours,
         totalNightWorkHours,
         basePay: basePayAmount,
-        nightPay: nightPayAmount
+        nightPay: nightPayAmount,
+        // 가불
+        totalAdvances,
+        netPay
     };
 }
