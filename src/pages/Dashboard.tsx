@@ -5,7 +5,7 @@ import { type Employee, type WorkLog } from '../types';
 import { formatCurrency } from '../utils/format';
 import { getBankCode } from '../utils/banks';
 import { calculatePay, type WeeklyDetail, type PayDetail } from '../utils/pay';
-import { Send, Lock, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { cn } from '../utils/cn';
 import { useDateFilter } from '../contexts/DateFilterContext';
@@ -437,48 +437,41 @@ export default function Dashboard() {
                                     )}
                                 </div>
 
-                                <div className="flex gap-3">
+                                <div className="flex flex-wrap justify-between items-center gap-3">
                                     {month !== 'ALL' && finalPay > 0 && (
-                                        <div className="flex-1 flex gap-2">
-                                            {isMonthLocked(emp.id) ? (
-                                                <>
-                                                    <Button
-                                                        onClick={() => { }}
-                                                        disabled={true}
-                                                        variant="secondary"
-                                                        className="flex-1 py-3.5 bg-gray-100 text-gray-400 cursor-not-allowed shadow-none border-transparent"
-                                                    >
-                                                        <Lock className="w-5 h-5" />
-                                                        지급 완료됨
-                                                    </Button>
-                                                    <button
-                                                        onClick={() => handleCancelPayment(emp)}
-                                                        className="px-3 text-xs text-gray-400 underline decoration-gray-300 hover:text-gray-600 transition-colors whitespace-nowrap"
-                                                    >
-                                                        지급 취소
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <Button
-                                                    onClick={() => handleCompletePayment(emp)}
-                                                    variant="secondary"
-                                                    className="flex-1 py-3.5 border-transparent bg-gray-100 hover:bg-gray-200 text-gray-600 shadow-none"
+                                        isMonthLocked(emp.id) ? (
+                                            <div className="flex items-center gap-2">
+                                                <span className="bg-green-100 text-green-700 px-2 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 whitespace-nowrap">
+                                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                                    지급완료
+                                                </span>
+                                                <button
+                                                    onClick={() => handleCancelPayment(emp)}
+                                                    className="text-gray-400 text-xs underline decoration-gray-300 hover:text-gray-600 transition-colors cursor-pointer whitespace-nowrap ml-1"
                                                 >
-                                                    <CheckCircle2 className="w-5 h-5" />
-                                                    지급 완료
-                                                </Button>
-                                            )}
-                                        </div>
+                                                    취소
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <Button
+                                                onClick={() => handleCompletePayment(emp)}
+                                                variant="secondary"
+                                                className="flex-1 min-w-[100px] py-3.5 border-transparent bg-gray-100 hover:bg-gray-200 text-gray-600 shadow-none whitespace-nowrap"
+                                            >
+                                                <CheckCircle2 className="w-5 h-5 mr-1" />
+                                                지급 완료
+                                            </Button>
+                                        )
                                     )}
                                     <Button
                                         onClick={() => handleTransfer(emp, finalPay)}
                                         disabled={finalPay <= 0}
                                         className={cn(
-                                            "flex-[2] py-3.5 shadow-lg shadow-teal-500/20 text-lg",
+                                            "flex-[2] min-w-[120px] py-3.5 shadow-lg shadow-teal-500/20 text-lg whitespace-nowrap shrink-0",
                                             finalPay <= 0 ? "bg-gray-100 text-gray-400 shadow-none" : "bg-primary text-white"
                                         )}
                                     >
-                                        <Send className="w-5 h-5" />
+                                        <Send className="w-5 h-5 mr-1.5" />
                                         {finalPay > 0 ? '송금하기' : '지급액 없음'}
                                     </Button>
                                 </div>
