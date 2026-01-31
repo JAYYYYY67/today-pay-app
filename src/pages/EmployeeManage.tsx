@@ -8,6 +8,7 @@ import Button from '../components/ui/Button';
 import { generateId } from '../utils/id';
 import { useBusiness } from '../contexts/BusinessContext';
 import { format } from 'date-fns';
+import PayDayBadge from '../components/common/PayDayBadge';
 
 export default function EmployeeManage() {
     const { currentBusinessId } = useBusiness();
@@ -199,9 +200,7 @@ export default function EmployeeManage() {
                             <div key={employee.id} className="bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 relative group transition-all hover:shadow-md hover:border-teal-100">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-2xl bg-teal-50 text-primary flex items-center justify-center font-bold text-lg shadow-inner">
-                                            {employee.name[0]}
-                                        </div>
+                                        <PayDayBadge payDay={employee.payDay} className="rounded-2xl text-lg" />
                                         <div>
                                             <h3 className="text-lg font-bold text-gray-900">{employee.name}</h3>
                                             <div className="flex items-center gap-2 mt-0.5">

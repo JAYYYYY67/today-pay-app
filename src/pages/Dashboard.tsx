@@ -11,6 +11,7 @@ import { cn } from '../utils/cn';
 import { useDateFilter } from '../contexts/DateFilterContext';
 
 import { useBusiness } from '../contexts/BusinessContext';
+import PayDayBadge from '../components/common/PayDayBadge';
 
 export default function Dashboard() {
     const { currentBusinessId } = useBusiness();
@@ -166,6 +167,28 @@ export default function Dashboard() {
         }));
     };
 
+    const handleCancelPayment = (emp: Employee) => {
+        if (month === 'ALL') return;
+
+        if (!window.confirm(`${month}월 급여 지급 상태를 취소하시겠습니까?\n\n취소하면 다시 근무 기록을 수정할 수 있게 됩니다.`)) {
+            return;
+        }
+
+        const start = startOfMonth(targetDate);
+        const end = endOfMonth(targetDate);
+
+        setAllWorkLogs(prev => prev.map(log => {
+            const logDate = new Date(log.date);
+            if (
+                log.employeeId === emp.id &&
+                isWithinInterval(logDate, { start, end })
+            ) {
+                return { ...log, isLocked: false };
+            }
+            return log;
+        }));
+    };
+
     const isMonthLocked = (empId: string) => {
         if (month === 'ALL') return false;
 
@@ -276,12 +299,13 @@ export default function Dashboard() {
                             )}>
                                 <div className="flex justify-between items-start">
                                     <div className="flex items-center gap-4">
-                                        <div className={cn(
-                                            "w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold shadow-inner",
-                                            emp.isRetired ? "bg-gray-200 text-gray-400" : "bg-teal-50 text-primary"
-                                        )}>
-                                            {emp.name[0]}
-                                        </div>
+                                        {emp.isRetired ? (
+                                            <div className="w-12 h-12 rounded-2xl bg-gray-200 flex items-center justify-center text-lg font-bold shadow-inner text-gray-400">
+                                                {emp.name[0]}
+                                            </div>
+                                        ) : (
+                                            <PayDayBadge payDay={emp.payDay} className="rounded-2xl text-lg" />
+                                        )}
                                         <div>
                                             <h4 className="font-bold text-gray-900 text-lg flex items-center gap-2">
                                                 {emp.name}
@@ -415,27 +439,36 @@ export default function Dashboard() {
 
                                 <div className="flex gap-3">
                                     {month !== 'ALL' && finalPay > 0 && (
-                                        <Button
-                                            onClick={() => handleCompletePayment(emp)}
-                                            disabled={isMonthLocked(emp.id)}
-                                            variant="secondary"
-                                            className={cn(
-                                                "flex-1 py-3.5 border-transparent bg-gray-100 hover:bg-gray-200 text-gray-600 shadow-none",
-                                                isMonthLocked(emp.id) && "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                            )}
-                                        >
+                                        <div className="flex-1 flex gap-2">
                                             {isMonthLocked(emp.id) ? (
                                                 <>
-                                                    <Lock className="w-5 h-5" />
-                                                    지급 완료됨
+                                                    <Button
+                                                        onClick={() => { }}
+                                                        disabled={true}
+                                                        variant="secondary"
+                                                        className="flex-1 py-3.5 bg-gray-100 text-gray-400 cursor-not-allowed shadow-none border-transparent"
+                                                    >
+                                                        <Lock className="w-5 h-5" />
+                                                        지급 완료됨
+                                                    </Button>
+                                                    <button
+                                                        onClick={() => handleCancelPayment(emp)}
+                                                        className="px-3 text-xs text-gray-400 underline decoration-gray-300 hover:text-gray-600 transition-colors whitespace-nowrap"
+                                                    >
+                                                        지급 취소
+                                                    </button>
                                                 </>
                                             ) : (
-                                                <>
+                                                <Button
+                                                    onClick={() => handleCompletePayment(emp)}
+                                                    variant="secondary"
+                                                    className="flex-1 py-3.5 border-transparent bg-gray-100 hover:bg-gray-200 text-gray-600 shadow-none"
+                                                >
                                                     <CheckCircle2 className="w-5 h-5" />
                                                     지급 완료
-                                                </>
+                                                </Button>
                                             )}
-                                        </Button>
+                                        </div>
                                     )}
                                     <Button
                                         onClick={() => handleTransfer(emp, finalPay)}

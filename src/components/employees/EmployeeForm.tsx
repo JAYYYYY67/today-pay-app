@@ -18,6 +18,7 @@ export default function EmployeeForm({ onSubmit, onCancel, onTransfer, initialDa
     const [name, setName] = useState(initialData?.name || '');
     const [paymentType, setPaymentType] = useState<PaymentType>(initialData?.paymentType || 'HOURLY');
     const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
+    const [payDay, setPayDay] = useState(initialData?.payDay || 1); // Default 1st
     const [applyHolidayAllowance, setApplyHolidayAllowance] = useState(initialData?.applyHolidayAllowance ?? true);
 
     // 세금 설정 state
@@ -82,6 +83,7 @@ export default function EmployeeForm({ onSubmit, onCancel, onTransfer, initialDa
                 taxRate: finalTaxRate,
                 applyHolidayAllowance,
                 active: true,
+                payDay,
             } as any);
         } catch (error) {
             console.error('Form Submission Error:', error);
@@ -157,6 +159,28 @@ export default function EmployeeForm({ onSubmit, onCancel, onTransfer, initialDa
                     }}
                     disabled={isSubmitting}
                 />
+
+                <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-gray-700 ml-1">월급날</label>
+                    <div className="relative">
+                        <select
+                            value={payDay}
+                            onChange={(e) => setPayDay(Number(e.target.value))}
+                            disabled={isSubmitting}
+                            className="w-full appearance-none bg-gray-50 border border-transparent text-gray-900 text-sm rounded-2xl focus:bg-white focus:ring-primary focus:border-primary block p-3.5 pr-8 font-medium transition-all"
+                        >
+                            <option value={99} className="font-bold text-teal-600">
+                                매월 말일
+                            </option>
+                            {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                                <option key={day} value={day}>
+                                    매월 {day}일
+                                </option>
+                            ))}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                    </div>
+                </div>
 
                 {/* Holiday Allowance Setting */}
                 {paymentType === 'HOURLY' && (

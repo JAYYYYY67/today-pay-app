@@ -2,10 +2,11 @@ import { useState, useRef } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { Employee, WorkLog } from '../types';
 import Button from '../components/ui/Button';
-import { Download, Upload, Trash2, RotateCcw, UserX, Type, Building2, Pencil, Plus, Check, X, BookOpen } from 'lucide-react';
+import { cn } from '../utils/cn';
+import Toggle from '../components/ui/Toggle';
+import { Download, Upload, Trash2, RotateCcw, UserX, Type, Building2, Pencil, Plus, Check, X, BookOpen, Bell } from 'lucide-react';
 import { useFontSize } from '../contexts/FontSizeContext';
 import { useBusiness } from '../contexts/BusinessContext';
-import { cn } from '../utils/cn';
 
 export default function SettingsPage() {
     const { fontSize, setFontSize } = useFontSize();
@@ -13,6 +14,7 @@ export default function SettingsPage() {
 
     const [allEmployees, setAllEmployees] = useLocalStorage<Employee[]>('employees', []);
     const [allWorkLogs, setAllWorkLogs] = useLocalStorage<WorkLog[]>('workLogs', []);
+    const [payDayNotification, setPayDayNotification] = useLocalStorage('payDayNotificationEnabled', true);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [isRetiredModalOpen, setIsRetiredModalOpen] = useState(false);
@@ -228,6 +230,32 @@ export default function SettingsPage() {
                             크게 (큰글씨)
                         </button>
                     </div>
+                </div>
+            </section>
+
+            <div className="h-px bg-gray-200 mx-2" />
+
+            {/* Notification Settings Section */}
+            <section className="space-y-4">
+                <h2 className="text-lg font-bold text-gray-800 px-1 flex items-center gap-2">
+                    알림 설정
+                </h2>
+                <div className="bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-yellow-50 flex items-center justify-center text-yellow-600">
+                            <Bell className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <p className="font-bold text-gray-900 text-lg">급여일 알림 받기</p>
+                            <p className="text-xs text-gray-500 font-medium mt-0.5">
+                                월급날 당일과 하루 전날에 알림을 보냅니다
+                            </p>
+                        </div>
+                    </div>
+                    <Toggle
+                        checked={payDayNotification}
+                        onChange={setPayDayNotification}
+                    />
                 </div>
             </section>
 

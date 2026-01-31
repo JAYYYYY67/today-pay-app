@@ -17,6 +17,7 @@ export interface Employee {
     applyHolidayAllowance: boolean; // 주휴수당 적용 여부
     active: boolean;
     isRetired?: boolean; // 퇴사 여부 (Soft Delete)
+    payDay?: number; // 월급날 (1~31)
     createdAt: number;
 }
 

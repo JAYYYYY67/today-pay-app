@@ -4,6 +4,11 @@ import { cn } from '../utils/cn';
 import DateNavigator from './common/DateNavigator';
 
 import BusinessSwitcher from './layout/BusinessSwitcher';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { checkPayDayNotifications, sendBrowserNotification, type PayDayNotificationResult } from '../utils/notification';
+import PayDayNoticeModal from './common/PayDayNoticeModal';
+import type { Employee } from '../types';
+import { useState, useEffect } from 'react';
 
 export default function Layout() {
     const location = useLocation();
@@ -17,6 +22,44 @@ export default function Layout() {
         { path: '/employees', label: '직원', icon: Users },
         { path: '/settings', label: '설정', icon: Settings },
     ];
+
+    // Notification Logic
+    const [employees] = useLocalStorage<Employee[]>('employees', []);
+    const [isNotificationEnabled] = useLocalStorage('payDayNotificationEnabled', true);
+    const [lastBrowserNotifDate, setLastBrowserNotifDate] = useLocalStorage('lastPayDayBrowserNotificationDate', '');
+    const [modalHiddenDate, setModalHiddenDate] = useLocalStorage('payDayModalHiddenDate', '');
+
+    const [modalData, setModalData] = useState<PayDayNotificationResult | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (!isNotificationEnabled) return;
+        if (employees.length === 0) return;
+
+        const result = checkPayDayNotifications(employees);
+        // 대상자가 없으면 리턴
+        if (result.dDayEmployees.length === 0 && result.dMinusOneEmployees.length === 0) return;
+
+        const todayStr = new Date().toDateString();
+
+        // 1. Browser Notification (하루 1회)
+        if (lastBrowserNotifDate !== todayStr && result.message) {
+            sendBrowserNotification(result.message);
+            setLastBrowserNotifDate(todayStr);
+        }
+
+        // 2. Modal Popup (오늘 그만 보기 체크 확인)
+        if (modalHiddenDate !== todayStr) {
+            setModalData(result);
+            // 페이지 로드 후 약간의 딜레이를 두고 띄우거나 바로 띄움
+            setIsModalOpen(true);
+        }
+    }, [employees, isNotificationEnabled, lastBrowserNotifDate, modalHiddenDate, setLastBrowserNotifDate]);
+
+    const handleDontShowToday = () => {
+        setModalHiddenDate(new Date().toDateString());
+        setIsModalOpen(false);
+    };
 
     return (
         <div className="min-h-screen bg-gray-100 flex justify-center">
@@ -63,6 +106,17 @@ export default function Layout() {
                     </div>
                 </nav>
             </div>
+
+            {/* Notification Modal */}
+            {isModalOpen && modalData && (
+                <PayDayNoticeModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onDontShowToday={handleDontShowToday}
+                    dDayEmployees={modalData.dDayEmployees}
+                    dMinusOneEmployees={modalData.dMinusOneEmployees}
+                />
+            )}
         </div>
     );
 }
