@@ -5,7 +5,7 @@ import { type Employee, type WorkLog } from '../types';
 import { formatCurrency } from '../utils/format';
 import { getBankCode } from '../utils/banks';
 import { calculatePay, type WeeklyDetail, type PayDetail } from '../utils/pay';
-import { Send, CheckSquare, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, CheckSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { cn } from '../utils/cn';
 import { useDateFilter } from '../contexts/DateFilterContext';
@@ -442,7 +442,7 @@ export default function Dashboard() {
                                         isMonthLocked(emp.id) ? (
                                             <div className="flex items-center gap-2">
                                                 <span className="bg-green-100 text-green-700 px-2 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 whitespace-nowrap">
-                                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                                    <CheckSquare className="w-3.5 h-3.5" />
                                                     지급완료
                                                 </span>
                                                 <button
