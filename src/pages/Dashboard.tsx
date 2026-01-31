@@ -5,7 +5,7 @@ import { type Employee, type WorkLog } from '../types';
 import { formatCurrency } from '../utils/format';
 import { getBankCode } from '../utils/banks';
 import { calculatePay, type WeeklyDetail, type PayDetail } from '../utils/pay';
-import { Send, CheckSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, CheckSquare, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { cn } from '../utils/cn';
 import { useDateFilter } from '../contexts/DateFilterContext';
@@ -177,6 +177,28 @@ export default function Dashboard() {
         } else {
             alert(`[PC 시뮬레이션]\n\n토스 앱으로 연결합니다.\n----------------\n받는분: ${emp.name}\n은행: ${emp.bankName} (${bankCode})\n계좌: ${emp.accountNumber}\n금액: ${formatCurrency(amount)}원`);
         }
+    };
+
+    const handleCopyPayStub = (emp: Employee, payDetail: PayDetail) => {
+        const { originalPay, holidayAllowance, taxAmount, totalAdvances, netPay } = payDetail;
+        const totalHours = payDetail.totalWorkHours || 0;
+
+        const stubText = `[${month}월 급여 명세서 - ${emp.name}님]
+
+✅ 근무시간: 총 ${totalHours}시간
+기본급: ${formatCurrency(originalPay)}원
+${holidayAllowance > 0 ? `주휴수당: +${formatCurrency(holidayAllowance)}원\n` : ''}${payDetail.nightPay && payDetail.nightPay > 0 ? `야간수당: +${formatCurrency(payDetail.nightPay * 3)}원\n` : ''}
+🔻 공제 내역
+${taxAmount > 0 ? `세금(${emp.taxRate || 3.3}%): -${formatCurrency(taxAmount)}원\n` : ''}${totalAdvances > 0 ? `가불 차감: -${formatCurrency(totalAdvances)}원\n` : ''}
+💰 실수령액: ${formatCurrency(netPay)}원
+
+수고하셨습니다!`;
+
+        navigator.clipboard.writeText(stubText).then(() => {
+            alert('📋 급여 명세서가 복사되었습니다!');
+        }).catch(() => {
+            alert('복사에 실패했습니다. 권한을 확인해주세요.');
+        });
     };
 
     const sortedEmployees = [...displayedEmployees].sort((a, b) => {
@@ -500,12 +522,20 @@ export default function Dashboard() {
                                         </>
                                     )}
 
-                                    <div className="pt-2 flex justify-start">
+                                    <div className="pt-2 flex flex-wrap justify-between items-center gap-3">
                                         <button
                                             onClick={() => handleOpenAdvanceModal(emp)}
-                                            className="text-xs flex items-center gap-1 text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-lg hover:bg-gray-200 transition-colors"
+                                            className="text-xs flex items-center gap-1.5 text-gray-500 bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
                                         >
                                             💸 가불 등록
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleCopyPayStub(emp, payDetail)}
+                                            className="text-xs flex items-center gap-1.5 text-gray-500 bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                                        >
+                                            <FileText className="w-3.5 h-3.5" />
+                                            명세서 복사
                                         </button>
                                     </div>
                                 </div>
