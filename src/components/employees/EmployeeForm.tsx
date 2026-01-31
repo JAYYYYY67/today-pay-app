@@ -18,7 +18,7 @@ export default function EmployeeForm({ onSubmit, onCancel, onTransfer, initialDa
     const [name, setName] = useState(initialData?.name || '');
     const [paymentType, setPaymentType] = useState<PaymentType>(initialData?.paymentType || 'HOURLY');
     const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
-    const [payDay, setPayDay] = useState(initialData?.payDay || 1); // Default 1st
+    const [payDay, setPayDay] = useState(initialData?.payDay || 99); // Default End of Month
     const [applyHolidayAllowance, setApplyHolidayAllowance] = useState(initialData?.applyHolidayAllowance ?? true);
 
     // 세금 설정 state
